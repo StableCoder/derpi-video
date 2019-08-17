@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 SEED_SITE=
-INVOKE_DIR=$(pwd)
+TARGET_DIR=$(pwd)/seed-workdir
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 RM_FORMATS=1
 
@@ -14,6 +14,11 @@ case $key in
     SEED_SITE="$2"
     shift # past argument
     shift # past value
+    ;;
+    -t|--target)
+    TARGET_DIR="$2"
+    shift
+    shift
     ;;
     --no-prune)
     RM_FORMATS=0
@@ -34,7 +39,8 @@ if [ $RM_FORMATS -eq 1 ] && [ ! -f $SCRIPT_DIR/../remove_formats.py ]; then
 fi
 
 # Get channels
-curl $SEED_SITE > youtube_archive.txt
+mkdir -p $TARGET_DIR
+cd $TARGET_DIR
 
 if [ $? -ne 0 ]; then
     echo "Failed to get seed data from '$SEED_SITE'"
@@ -74,5 +80,4 @@ while read FULL_CHANNEL; do
         done
     fi
 
-    cd $INVOKE_DIR
-done < channel_folders.txt
+    cd $TARGET_DIR
