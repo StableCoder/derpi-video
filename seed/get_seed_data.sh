@@ -41,6 +41,7 @@ fi
 # Get channels
 mkdir -p $TARGET_DIR
 cd $TARGET_DIR
+curl $SEED_SITE > .youtube_archive.txt
 
 if [ $? -ne 0 ]; then
     echo "Failed to get seed data from '$SEED_SITE'"
@@ -49,28 +50,28 @@ fi
 
 # Below is the regex we use to grab out the directory name for use
 # alt="\[DIR\]"><\/td><td><a href="([^"]+)
-cat youtube_archive.txt | awk 'match($0, /alt="\[DIR\]"><\/td><td><a href="([^"]+)/, m) { print m[1] }' > channel_folders.txt
+cat .youtube_archive.txt | awk 'match($0, /alt="\[DIR\]"><\/td><td><a href="([^"]+)/, m) { print m[1] }' > .channel_folders.txt
 
 while read FULL_CHANNEL; do
-    curl $SEED_SITE$FULL_CHANNEL > channel_data.txt
-
     ## Go to a channel-specific folder
     mkdir -p $FULL_CHANNEL
     cd $FULL_CHANNEL
 
+    curl $SEED_SITE$FULL_CHANNEL > .channel_data.txt
+
     # Grab all the *.info.json files that are linked
     # cat channel_data.txt | awk 'match($0, /a href="(.*\.info\.json)"/, m) { print m[1] }' > channel_videos.txt
     # Reduce to just the Video IDs
-    cat ../channel_data.txt | awk 'match($0, /a href=".*(.{11})\.info\.json"/, m) { print m[1] }' > channel_videos.txt
+    cat .channel_data.txt | awk 'match($0, /a href=".*(.{11})\.info\.json"/, m) { print m[1] }' > .channel_videos.txt
 
     while read VIDEO_ID; do
         youtube-dl --write-info-json --write-all-thumbnails https://youtu.be/$VIDEO_ID
         if [ $? -ne 0 ]; then
             echo "!! Download of VideoID $VIDEO_ID failed for channel $FULL_CHANNEL !!"
-            echo "$FULL_CHANNEL $VIDEO_ID" >> ../failed_from_youtube.txt
+            echo "$FULL_CHANNEL $VIDEO_ID" >> $TARGET_DIR/.failed_from_youtube.txt
         fi
         sleep 2s
-    done < channel_videos.txt
+    done < .channel_videos.txt
 
     # Remove the useless (for us) 'formats' section from the json files.
     if [ RM_FORMATS -eq 1 ]; then
@@ -81,3 +82,4 @@ while read FULL_CHANNEL; do
     fi
 
     cd $TARGET_DIR
+done < .channel_folders.txt
