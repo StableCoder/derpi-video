@@ -13,7 +13,7 @@ import datetime
 
 def AddFailure(seedDir, failure):
     with open(seedDir + '/' + '.mongo_export_fail.txt', 'a') as failFile:
-        failFile.write(failure)
+        failFile.write(failure + '\n')
 
 
 def InsertEntry(seedDir, infoFile):
