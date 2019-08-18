@@ -22,7 +22,8 @@ def InsertEntry(seedDir, infoFile):
     globSafeRootFilename = rootFilename.replace('[', '[[]')
 
     with open(infoFile) as regInfoFile:
-        entry = json.load(regInfoFile)
+        entry = dict()
+        entry['youtube_data'] = json.load(regInfoFile)
 
         # Derpi Info File
         if not os.path.isfile(dirPath + '/' + rootFilename + '.derpi.json'):
@@ -49,7 +50,7 @@ def InsertEntry(seedDir, infoFile):
                 derpiEntry['thumbnail'] = dirPath + '/' + rootFilename + '.jpg'
             else:
                 print('Error, thumbnail file for ' +
-                      entry['id'] + ' not found!')
+                      ytEntry['id'] + ' not found!')
                 AddFailure(seedDir, rootFilename)
                 return
 
@@ -57,19 +58,19 @@ def InsertEntry(seedDir, infoFile):
                 json.dump(derpiEntry, outDerpiFile, indent=4)
 
         with open(dirPath + '/' + rootFilename + '.derpi.json') as derpiInfoFile:
-            derpiEntry = json.load(derpiInfoFile)
-            entry['derpi_data'] = derpiEntry
+            entry['derpi_data'] = json.load(derpiInfoFile)
 
         # Upsert into the Mongo DB
         client = MongoClient('localhost', 27017)
         db = client.archive
         collection = db.video
-        entry['_id'] = entry['id']
+
+        entry['_id'] = entry['youtube_data']['id']
         collection.update_one({'_id': entry['_id']}, {
                               '$set': entry}, upsert=True)
 
 
-targetDir = os.getcwd()
+targetDir = os.getcwd() + '/seed-workdir'
 if len(sys.argv) > 1:
     targetDir = sys.argv[1]
 
