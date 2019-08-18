@@ -74,7 +74,7 @@ while read FULL_CHANNEL; do
     done < .channel_videos.txt
 
     # Remove the useless (for us) 'formats' section from the json files.
-    if [ RM_FORMATS -eq 1 ]; then
+    if [ $RM_FORMATS -eq 1 ]; then
         for FILE in ./*.info.json
         do
             $SCRIPT_DIR/../remove_formats.py "$FILE"
