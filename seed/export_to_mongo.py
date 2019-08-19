@@ -41,7 +41,7 @@ def InsertEntry(seedDir, infoFile):
                 derpiEntry['video'] = dirPath + '/' + rootFilename + files[0]
             else:
                 print('Error, video file for ' +
-                      rootFilename + 'not found or ambiguous!')
+                      rootFilename + ' not found or ambiguous!')
                 AddFailure(seedDir, rootFilename)
                 return
 
