@@ -10,6 +10,10 @@ def GetVideoID(url):
     return ""
 
 
+def MainPage():
+    return {'main': 'page'}
+
+
 def ArchiveGet():
     client = MongoClient('localhost', 27017)
     db = client.archive
