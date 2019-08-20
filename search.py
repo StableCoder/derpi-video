@@ -100,6 +100,15 @@ def youtube_tag_search(searchList):
     return finds.count(), retList
 
 
+def derpi_tag_search(searchList):
+    db = get_db()
+    finds = db.video.find({'derpi_data.tags': 'gameboy'})
+    retList = []
+    for it in finds:
+        retList.append(entry_return_summary(it))
+    return finds.count(), retList
+
+
 def search_endpoint(url_path):
     # Remove the '/search' part to get the given options
     options = url_path[len('/search?'):]
