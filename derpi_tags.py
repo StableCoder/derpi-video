@@ -6,7 +6,7 @@ def get_db():
     return client.archive
 
 
-def create_tag(tag):
+def create_tag(tag, description):
     """
     Attempts to create a new tag
 
@@ -14,6 +14,8 @@ def create_tag(tag):
     ----------
     tag : string
         The tag string
+    description : string
+        The description for a tag
 
     Returns
     -------
@@ -22,7 +24,9 @@ def create_tag(tag):
     """
     db = get_db()
     try:
-        db.tags.insert_one({'_id': tag, 'count': 0, 'alias': []})
+        db.tags.insert_one(
+            {'_id': tag, 'description': description, 'count': 0, 'alias': []})
+        recount_tag(tag)
         return True
     except:
         return False
