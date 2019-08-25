@@ -25,6 +25,8 @@ case $key in
     shift
     ;;
     *)    # unknown option
+    echo "Unknown option: $1"
+    exit 1
     ;;
 esac
 done
