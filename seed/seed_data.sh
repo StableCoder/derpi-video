@@ -2,6 +2,7 @@
 
 TARGET_DIR=$(pwd)/seed-workdir
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+COMPLETE_SCRIPT=
 RM_FORMATS=1
 
 while [[ $# -gt 0 ]]
@@ -11,6 +12,11 @@ key="$1"
 case $key in
     -t|--target)
     TARGET_DIR="$2"
+    shift
+    shift
+    ;;
+    -c|--complete)
+    COMPLETE_SCRIPT=$2
     shift
     shift
     ;;
@@ -43,6 +49,10 @@ for FULL_CHANNEL in */ ; do
                 do
                     $SCRIPT_DIR/../remove_formats.py "$FILE"
                 done
+            fi
+
+            if [ "$COMPLETE_SCRIPT" != "" ]; then
+                $COMPLETE_SCRIPT $VIDEO_ID
             fi
         fi
         sleep 2s

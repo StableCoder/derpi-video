@@ -3,6 +3,7 @@
 SEED_SITE=
 TARGET_DIR=$(pwd)/seed-workdir
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+COMPLETE_SCRIPT=
 RM_FORMATS=1
 
 while [[ $# -gt 0 ]]
@@ -17,6 +18,11 @@ case $key in
     ;;
     -t|--target)
     TARGET_DIR="$2"
+    shift
+    shift
+    ;;
+    -c|--complete)
+    COMPLETE_SCRIPT=$2
     shift
     shift
     ;;
@@ -68,16 +74,23 @@ for FULL_CHANNEL in */ ; do
                     break
                 fi
 
-                # Remove the useless (for us) 'formats' section from the json files.
-                if [ $RM_FORMATS -eq 1 ]; then
-                    for FILE in ./*-$VIDEO_ID.info.json ; do
-                        $SCRIPT_DIR/../remove_formats.py "$FILE"
-                    done
-                fi
-
                 # Give the seed server a small break
                 sleep 2
             done
+
+            # Remove the useless (for us) 'formats' section from the json files.
+            if [ $RM_FORMATS -eq 1 ]; then
+                for FILE in ./*-$VIDEO_ID.info.json ; do
+                    $SCRIPT_DIR/../remove_formats.py "$FILE"
+                done
+            fi
+
+            # With everything done/downloaded, we will now run the 'complete' script
+            if [ "$COMPLETE_SCRIPT" != "" ]; then
+                $COMPLETE_SCRIPT $VIDEO_ID
+            fi
+            break
+
         done < .youtube_dl_fail
     fi
 
