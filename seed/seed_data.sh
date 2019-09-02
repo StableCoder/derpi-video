@@ -52,7 +52,7 @@ for FULL_CHANNEL in */ ; do
             fi
 
             if [ "$COMPLETE_SCRIPT" != "" ]; then
-                $COMPLETE_SCRIPT $VIDEO_ID
+                $COMPLETE_SCRIPT $FULL_CHANNEL $VIDEO_ID
             fi
         fi
         sleep 2s

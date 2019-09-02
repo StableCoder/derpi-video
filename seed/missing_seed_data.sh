@@ -87,7 +87,7 @@ for FULL_CHANNEL in */ ; do
 
             # With everything done/downloaded, we will now run the 'complete' script
             if [ "$COMPLETE_SCRIPT" != "" ]; then
-                $COMPLETE_SCRIPT $VIDEO_ID
+                $COMPLETE_SCRIPT $FULL_CHANNEL $VIDEO_ID
             fi
             break
 
