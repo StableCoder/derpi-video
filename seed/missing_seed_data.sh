@@ -2,7 +2,7 @@
 
 SEED_SITE=
 TARGET_DIR=$(pwd)/seed-workdir
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+SCRIPT_DIR="$( cd -- "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 COMPLETE_SCRIPT=
 RM_FORMATS=1
 
@@ -46,14 +46,14 @@ if [ $RM_FORMATS -eq 1 ] && [ ! -f $SCRIPT_DIR/../remove_formats.py ]; then
     exit 1
 fi
 
-cd $TARGET_DIR
+cd -- $TARGET_DIR
 
 # Now go through each channel, finding videos that could not be retrieved from youtube,
 # and pull them from our seed location instead
 for FULL_CHANNEL in */ ; do
     echo "Downloading unfound videos for $FULL_CHANNEL"
     
-    cd $FULL_CHANNEL
+    cd -- $FULL_CHANNEL
 
     if [ -f ".youtube_dl_fail" ]; then
         echo "Found a file"
@@ -94,5 +94,5 @@ for FULL_CHANNEL in */ ; do
         done < .youtube_dl_fail
     fi
 
-    cd $TARGET_DIR
+    cd -- $TARGET_DIR
 done

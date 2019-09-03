@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 TARGET_DIR=$(pwd)/seed-workdir
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+SCRIPT_DIR="$( cd -- "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 COMPLETE_SCRIPT=
 RM_FORMATS=1
 
@@ -35,7 +35,7 @@ done
 for FULL_CHANNEL in */ ; do
     echo "Downloading videos for $FULL_CHANNEL"
 
-    cd $FULL_CHANNEL
+    cd -- $FULL_CHANNEL
 
     while read VIDEO_ID; do
         youtube-dl --write-info-json --write-all-thumbnails https://youtu.be/$VIDEO_ID
@@ -58,5 +58,5 @@ for FULL_CHANNEL in */ ; do
         sleep 2s
     done < .channel_videos
 
-    cd $TARGET_DIR
+    cd -- $TARGET_DIR
 done

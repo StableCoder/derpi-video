@@ -2,7 +2,7 @@
 
 SEED_SITE=
 TARGET_DIR=$(pwd)/seed-workdir
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+SCRIPT_DIR="$( cd -- "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 while [[ $# -gt 0 ]]
 do
@@ -32,8 +32,8 @@ if [ "$SEED_SITE" == "" ]; then
 fi
 
 # Get channels
-mkdir -p $TARGET_DIR
-cd $TARGET_DIR
+mkdir -p -- $TARGET_DIR
+cd -- $TARGET_DIR
 curl $SEED_SITE > .youtube_archive
 
 if [ $? -ne 0 ]; then
@@ -50,8 +50,8 @@ while read FULL_CHANNEL; do
     echo "Downloading channel data for $FULL_CHANNEL"
 
     ## Go to a channel-specific folder
-    mkdir -p $FULL_CHANNEL
-    cd $FULL_CHANNEL
+    mkdir -p -- $FULL_CHANNEL
+    cd -- $FULL_CHANNEL
 
     curl $SEED_SITE$FULL_CHANNEL > .channel_data
 
@@ -64,5 +64,5 @@ while read FULL_CHANNEL; do
     sleep 3s
 
     # Back to root seed dir
-    cd $TARGET_DIR
+    cd -- $TARGET_DIR
 done < .channel_folders
