@@ -9,7 +9,9 @@ import os
 # Write out the json w/o the 'formats' section into the same file but appended with the '.temp'
 with open(sys.argv[1]) as f:
     d = json.load(f)
-    d['formats'] = []
+    del d['formats']
+    del d['thumbnails']
+    del d['thumbnail']
     with open(sys.argv[1] + '.temp', 'w') as outFile:
         json.dump(d, outFile, indent=4)
 

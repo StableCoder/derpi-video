@@ -50,7 +50,7 @@ for FULL_CHANNEL in */ ; do
             if [ $RM_FORMATS -eq 1 ]; then
                 for FILE in ./*-$VIDEO_ID.info.json
                 do
-                    $SCRIPT_DIR/../remove_formats.py "$FILE"
+                    $SCRIPT_DIR/../clean_info_json.py "$FILE"
                 done
             fi
 
@@ -58,7 +58,7 @@ for FULL_CHANNEL in */ ; do
                 $COMPLETE_SCRIPT $FULL_CHANNEL $VIDEO_ID
             fi
         fi
-        
+
         sleep 2s
     done < .channel_videos
 

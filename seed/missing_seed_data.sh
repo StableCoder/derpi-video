@@ -81,7 +81,7 @@ for FULL_CHANNEL in */ ; do
             # Remove the useless (for us) 'formats' section from the json files.
             if [ $RM_FORMATS -eq 1 ]; then
                 for FILE in ./*-$VIDEO_ID.info.json ; do
-                    $SCRIPT_DIR/../remove_formats.py "$FILE"
+                    $SCRIPT_DIR/../clean_info_json.py "$FILE"
                 done
             fi
 
