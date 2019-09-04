@@ -29,7 +29,7 @@ def InsertEntry(seedDir, infoFile):
         if not os.path.isfile(dirPath + '/' + rootFilename + '.derpi.json'):
             # Create it now
             derpiEntry = {
-                'status': 'archived',
+                'status': 'available',
                 'archived': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 'last_checked': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             }
