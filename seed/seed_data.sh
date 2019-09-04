@@ -58,8 +58,7 @@ for FULL_CHANNEL in */ ; do
                 $COMPLETE_SCRIPT $FULL_CHANNEL $VIDEO_ID
             fi
         fi
-
-        break
+        
         sleep 2s
     done < .channel_videos
 
