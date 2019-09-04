@@ -31,6 +31,8 @@ case $key in
 esac
 done
 
+cd -- $TARGET_DIR
+
 # Now go through each channel/directory and download the videos
 for FULL_CHANNEL in */ ; do
     echo "Downloading videos for $FULL_CHANNEL"
@@ -40,6 +42,7 @@ for FULL_CHANNEL in */ ; do
     while read VIDEO_ID; do
         youtube-dl --write-info-json --write-all-thumbnails https://youtu.be/$VIDEO_ID
         if [ $? -ne 0 ]; then
+            rm -f *-$VIDEO_ID*
             echo "!! Download of VideoID $VIDEO_ID failed for channel $FULL_CHANNEL !!"
             echo "$VIDEO_ID" >> .youtube_dl_fail
         else
@@ -55,6 +58,8 @@ for FULL_CHANNEL in */ ; do
                 $COMPLETE_SCRIPT $FULL_CHANNEL $VIDEO_ID
             fi
         fi
+
+        break
         sleep 2s
     done < .channel_videos
 
