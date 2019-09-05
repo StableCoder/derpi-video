@@ -43,6 +43,11 @@ case $key in
 esac
 done
 
+if [ $RM_FORMATS -eq 1 ] && [ ! -f $SCRIPT_DIR/../clean_info_json.py ]; then
+    echo "!! Cannot find the 'clean_info_json.py' script correctly, is it in the correct location?"
+    exit 1
+fi
+
 cd -- $TARGET_DIR
 
 # Now go through each channel/directory and download the videos

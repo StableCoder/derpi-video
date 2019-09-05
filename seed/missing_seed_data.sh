@@ -53,8 +53,8 @@ if [ "$SEED_SITE" == "" ]; then
     echo "Need to provide a seed site to start!"
     exit 1
 fi
-if [ $RM_FORMATS -eq 1 ] && [ ! -f $SCRIPT_DIR/../remove_formats.py ]; then
-    echo "!! Cannot find the 'remove_formats.py' script correctly, is it in the correct location?"
+if [ $RM_FORMATS -eq 1 ] && [ ! -f $SCRIPT_DIR/../clean_info_json.py ]; then
+    echo "!! Cannot find the 'clean_info_json.py' script correctly, is it in the correct location?"
     exit 1
 fi
 
