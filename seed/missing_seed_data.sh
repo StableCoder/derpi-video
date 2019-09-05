@@ -77,7 +77,7 @@ for FULL_CHANNEL in $FOLDER/ ; do
             # Grep the lines we want: cat .channel_data | grep $VIDEO_ID
             # Then awk just the filenames we want: awk 'match($0, /a href="([^"]*)/, m) { print m[1] }'
             # Then grep the lines that DON't have '.description'
-            cat .channel_data | grep $VIDEO_ID | awk 'match($0, /a href="([^"]*)/, m) { print m[1] }' | grep -v '.description' | while read -r LINK ; do
+            cat .channel_data | grep -- $VIDEO_ID | awk 'match($0, /a href="([^"]*)/, m) { print m[1] }' | grep -v '.description' | while read -r LINK ; do
                 # Download each item now
                 curl $SEED_SITE$FULL_CHANNEL$LINK -o $LINK
                 if [ $? -ne 0 ]; then
