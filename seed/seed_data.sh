@@ -3,6 +3,7 @@
 TARGET_DIR=$(pwd)/seed-workdir
 SCRIPT_DIR="$( cd -- "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 FOLDER=*
+DELAY=20s
 COMPLETE_SCRIPT=
 RM_FORMATS=1
 
@@ -11,6 +12,11 @@ do
 key="$1"
 
 case $key in
+    -d|--delay)
+    DELAY=$2
+    shift
+    shift
+    ;;
     -t|--target)
     TARGET_DIR="$2"
     shift
@@ -65,7 +71,7 @@ for FULL_CHANNEL in $FOLDER/ ; do
             fi
         fi
 
-        sleep 20s
+        sleep $DELAY
     done < .channel_videos
 
     cd -- $TARGET_DIR

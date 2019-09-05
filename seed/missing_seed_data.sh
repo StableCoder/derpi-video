@@ -4,6 +4,7 @@ SEED_SITE=
 TARGET_DIR=$(pwd)/seed-workdir
 SCRIPT_DIR="$( cd -- "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 FOLDER=*
+DELAY=20s
 COMPLETE_SCRIPT=
 RM_FORMATS=1
 
@@ -12,6 +13,11 @@ do
 key="$1"
 
 case $key in
+    -d|--delay)
+    DELAY=$2
+    shift
+    shift
+    ;;
     -s|--seed)
     SEED_SITE="$2"
     shift # past argument
@@ -94,7 +100,7 @@ for FULL_CHANNEL in $FOLDER/ ; do
                 $COMPLETE_SCRIPT $FULL_CHANNEL $VIDEO_ID
             fi
 
-            sleep 20
+            sleep $DELAY
         done < .youtube_dl_fail
     fi
 
