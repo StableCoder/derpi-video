@@ -2,6 +2,7 @@
 
 TARGET_DIR=$(pwd)/seed-workdir
 SCRIPT_DIR="$( cd -- "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+FOLDER=*
 COMPLETE_SCRIPT=
 RM_FORMATS=1
 
@@ -20,6 +21,11 @@ case $key in
     shift
     shift
     ;;
+    -f|--folder)
+    FOLDER=$2
+    shift
+    shift
+    ;;
     --no-prune)
     RM_FORMATS=0
     shift
@@ -34,7 +40,7 @@ done
 cd -- $TARGET_DIR
 
 # Now go through each channel/directory and download the videos
-for FULL_CHANNEL in */ ; do
+for FULL_CHANNEL in $FOLDER/ ; do
     echo "Downloading videos for $FULL_CHANNEL"
 
     cd -- $FULL_CHANNEL
@@ -59,7 +65,7 @@ for FULL_CHANNEL in */ ; do
             fi
         fi
 
-        sleep 2s
+        sleep 20s
     done < .channel_videos
 
     cd -- $TARGET_DIR

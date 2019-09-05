@@ -3,6 +3,7 @@
 SEED_SITE=
 TARGET_DIR=$(pwd)/seed-workdir
 SCRIPT_DIR="$( cd -- "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+FOLDER=*
 COMPLETE_SCRIPT=
 RM_FORMATS=1
 
@@ -23,6 +24,11 @@ case $key in
     ;;
     -c|--complete)
     COMPLETE_SCRIPT=$2
+    shift
+    shift
+    ;;
+    -f|--folder)
+    FOLDER=$2
     shift
     shift
     ;;
@@ -50,7 +56,7 @@ cd -- $TARGET_DIR
 
 # Now go through each channel, finding videos that could not be retrieved from youtube,
 # and pull them from our seed location instead
-for FULL_CHANNEL in */ ; do
+for FULL_CHANNEL in $FOLDER/ ; do
     echo "Downloading unfound videos for $FULL_CHANNEL"
     
     cd -- $FULL_CHANNEL
@@ -71,11 +77,9 @@ for FULL_CHANNEL in */ ; do
                 if [ $? -ne 0 ]; then
                     echo "Failed to download $VIDEO_ID from the original seed source"
                     echo "$VIDEO_ID" >> .seed_dl_fail
-                    break
                 fi
 
                 # Give the seed server a small break
-                sleep 2
             done
 
             # Remove the useless (for us) 'formats' section from the json files.
@@ -89,8 +93,8 @@ for FULL_CHANNEL in */ ; do
             if [ "$COMPLETE_SCRIPT" != "" ]; then
                 $COMPLETE_SCRIPT $FULL_CHANNEL $VIDEO_ID
             fi
-            break
 
+            sleep 20
         done < .youtube_dl_fail
     fi
 
