@@ -58,7 +58,7 @@ for FULL_CHANNEL in $FOLDER/ ; do
             rm -f *-$VIDEO_ID*
             echo "!! Download of VideoID $VIDEO_ID failed for channel $FULL_CHANNEL !!"
             echo "$VIDEO_ID" >> .youtube_dl_fail
-            sleep 40s
+            sleep 61s
         else
             # Remove the useless (for us) 'formats' section from the json files.
             if [ $RM_FORMATS -eq 1 ]; then
@@ -72,7 +72,7 @@ for FULL_CHANNEL in $FOLDER/ ; do
                 $COMPLETE_SCRIPT $FULL_CHANNEL $VIDEO_ID
             fi
 
-            sleep 20s
+            sleep 31s
         fi
     done < .channel_videos
 
