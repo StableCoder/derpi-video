@@ -43,6 +43,8 @@ case $key in
 esac
 done
 
+exec 2>&1
+
 if [ "$SEED_SITE" == "" ]; then
     echo "Need to provide a seed site to start!"
     exit 1

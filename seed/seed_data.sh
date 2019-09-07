@@ -37,6 +37,8 @@ case $key in
 esac
 done
 
+exec 2>&1
+
 if [ $RM_FORMATS -eq 1 ] && [ ! -f $SCRIPT_DIR/../clean_info_json.py ]; then
     echo "!! Cannot find the 'clean_info_json.py' script correctly, is it in the correct location?"
     exit 1
