@@ -3,7 +3,6 @@
 TARGET_DIR=$(pwd)/seed-workdir
 SCRIPT_DIR="$( cd -- "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 FOLDER=*
-DELAY=20s
 COMPLETE_SCRIPT=
 RM_FORMATS=1
 
@@ -12,11 +11,6 @@ do
 key="$1"
 
 case $key in
-    -d|--delay)
-    DELAY=$2
-    shift
-    shift
-    ;;
     -t|--target)
     TARGET_DIR="$2"
     shift
@@ -62,6 +56,7 @@ for FULL_CHANNEL in $FOLDER/ ; do
             rm -f *-$VIDEO_ID*
             echo "!! Download of VideoID $VIDEO_ID failed for channel $FULL_CHANNEL !!"
             echo "$VIDEO_ID" >> .youtube_dl_fail
+            sleep 40s
         else
             # Remove the useless (for us) 'formats' section from the json files.
             if [ $RM_FORMATS -eq 1 ]; then
@@ -74,9 +69,9 @@ for FULL_CHANNEL in $FOLDER/ ; do
             if [ "$COMPLETE_SCRIPT" != "" ]; then
                 $COMPLETE_SCRIPT $FULL_CHANNEL $VIDEO_ID
             fi
-        fi
 
-        sleep $DELAY
+            sleep 20s
+        fi
     done < .channel_videos
 
     cd -- $TARGET_DIR
