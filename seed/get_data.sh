@@ -4,7 +4,8 @@ SEED_SITE=
 TARGET_DIR=$(pwd)/seed-workdir
 SCRIPT_DIR="$( cd -- "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 FOLDER=*
-COMPLETE_SCRIPT=
+FROM_YT_SCRIPT=
+FROM_SEED_SCRIPT=
 RM_FORMATS=1
 
 while [[ $# -gt 0 ]]
@@ -22,8 +23,13 @@ case $key in
     shift
     shift
     ;;
-    -c|--complete)
-    COMPLETE_SCRIPT=$2
+    --from-youtube)
+    FROM_YT_SCRIPT=$2
+    shift
+    shift
+    ;;
+    --from-seed)
+    FROM_SEED_SCRIPT=$2
     shift
     shift
     ;;
@@ -56,18 +62,18 @@ fi
 
 cd -- $TARGET_DIR
 
-# Now go through each channel, finding videos that could not be retrieved from youtube,
-# and pull them from our seed location instead
+# Now go through each channel/directory and download the videos
 for FULL_CHANNEL in $FOLDER/ ; do
-    echo "Downloading unfound videos for $FULL_CHANNEL"
-    
+    echo "Downloading videos for $FULL_CHANNEL"
+
     cd -- $FULL_CHANNEL
 
-    if [ -f ".youtube_dl_fail" ]; then
-        echo "Found a file"
-        # Only do stuff if any actually failed from youtube
-        while read VIDEO_ID; do
-            echo "Retrieving video $VIDEO_ID from seed source"
+    while read VIDEO_ID; do
+        youtube-dl --write-info-json --write-all-thumbnails https://youtu.be/$VIDEO_ID
+        if [ $? -ne 0 ]; then
+            rm -f *-$VIDEO_ID*
+            echo "!! Download of $FULL_CHANNEL / $VIDEO_ID failed from Youtube !!"
+            echo "$VIDEO_ID" >> .youtube_dl_fail
 
             # Read the seed channel data to get all the files for the same video ID downloaded
             # Grep the lines we want: cat .channel_data | grep $VIDEO_ID
@@ -79,24 +85,38 @@ for FULL_CHANNEL in $FOLDER/ ; do
                 if [ $? -ne 0 ]; then
                     echo "Failed to download $VIDEO_ID from the original seed source"
                     echo "$VIDEO_ID" >> .seed_dl_fail
+                    rm -f *-$VIDEO_ID*
+                    exit
                 fi
             done
-
+            if [ $? -eq 0 ]; then
+            echo DOING IT
+                if [ "$FROM_SEED_SCRIPT" != "" ]; then
+                    echo "Calling the 'FROM SEED SCRIPT' for $VIDEO_ID"
+                    $FROM_SEED_SCRIPT $FULL_CHANNEL $VIDEO_ID
+                fi
+            fi
+        else
             # Remove the useless (for us) 'formats' section from the json files.
             if [ $RM_FORMATS -eq 1 ]; then
-                for FILE in ./*-$VIDEO_ID.info.json ; do
+                for FILE in ./*-$VIDEO_ID.info.json
+                do
                     $SCRIPT_DIR/../clean_info_json.py "$FILE"
                 done
             fi
 
-            # With everything done/downloaded, we will now run the 'complete' script
-            if [ "$COMPLETE_SCRIPT" != "" ]; then
-                $COMPLETE_SCRIPT $FULL_CHANNEL $VIDEO_ID
+            if [ "$FROM_YT_SCRIPT" != "" ]; then
+            echo "Calling the 'FROM YOUTUBE SCRIPT' for $VIDEO_ID"
+                $FROM_YT_SCRIPT $FULL_CHANNEL $VIDEO_ID
             fi
 
-            sleep 20s
-        done < .youtube_dl_fail
-    fi
+            echo "$VIDEO_ID" >> .youtube_dl_success
+        fi
+        break
+        sleep 65
+    done < .channel_videos
+
+    break
 
     cd -- $TARGET_DIR
 done
