@@ -69,11 +69,26 @@ for FULL_CHANNEL in $FOLDER/ ; do
     cd -- $FULL_CHANNEL
 
     while read VIDEO_ID; do
+        # Check to see if the video was already downloaded in a prior run
+        if [ -f .youtube_dl_success ]; then
+            if [ "$(grep $VIDEO_ID .youtube_dl_success)" != "" ]; then
+                echo "Video $FULL_CHANNEL / $VIDEO_ID previously downloaded from Youtube, skipping..."
+                continue
+            fi
+        fi
+
+        if [ -f .seed_dl_success ]; then
+            if [ "$(grep $VIDEO_ID .seed_dl_success)" != "" ]; then
+                echo "Video $FULL_CHANNEL / $VIDEO_ID previously downloaded from Seed, skipping..."
+                continue
+            fi
+        fi
+
+        # At this point, we're going to try to download it
         youtube-dl --write-info-json --write-all-thumbnails https://youtu.be/$VIDEO_ID
         if [ $? -ne 0 ]; then
             rm -f *-$VIDEO_ID*
             echo "!! Download of $FULL_CHANNEL / $VIDEO_ID failed from Youtube !!"
-            echo "$VIDEO_ID" >> .youtube_dl_fail
 
             # Read the seed channel data to get all the files for the same video ID downloaded
             # Grep the lines we want: cat .channel_data | grep $VIDEO_ID
@@ -86,10 +101,10 @@ for FULL_CHANNEL in $FOLDER/ ; do
                     echo "Failed to download $VIDEO_ID from the original seed source"
                     echo "$VIDEO_ID" >> .seed_dl_fail
                     rm -f *-$VIDEO_ID*
-                    exit
                 fi
             done
             if [ $? -eq 0 ]; then
+                echo "$VIDEO_ID" >> .seed_dl_success
                 if [ "$FROM_SEED_SCRIPT" != "" ]; then
                     echo "Calling the 'FROM SEED SCRIPT' for $VIDEO_ID"
                     $FROM_SEED_SCRIPT $FULL_CHANNEL $VIDEO_ID
