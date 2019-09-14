@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+# Colours
+RED='\033[0;31m'
+YELLOW='\033[0;1;33m'
+GREEN='\033[0;32m'
+LIGHT_GREEN='\033[1;32m'
+NO_COLOUR='\033[0m'
+
+# Script Vars
 SEED_SITE=
 TARGET_DIR=$(pwd)/seed-workdir
 SCRIPT_DIR="$( cd -- "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
@@ -43,7 +51,7 @@ case $key in
     shift
     ;;
     *)    # unknown option
-    echo "Unknown option: $1"
+    printf "${RED}ERROR${NO_COLOUR}: Unknown option: $1\n"
     exit 1
     ;;
 esac
@@ -52,11 +60,11 @@ done
 exec 2>&1
 
 if [ "$SEED_SITE" == "" ]; then
-    echo "Need to provide a seed site to start!"
+    printf "${RED}ERROR${NO_COLOUR}: Need to provide a seed site to start!\n"
     exit 1
 fi
 if [ $RM_FORMATS -eq 1 ] && [ ! -f $SCRIPT_DIR/../clean_info_json.py ]; then
-    echo "!! Cannot find the 'clean_info_json.py' script correctly, is it in the correct location?"
+    printf "${RED}ERROR${NO_COLOUR}: Cannot find the 'clean_info_json.py' script correctly, is it in the correct location?\n"
     exit 1
 fi
 
@@ -64,7 +72,7 @@ cd -- $TARGET_DIR
 
 # Now go through each channel/directory and download the videos
 for FULL_CHANNEL in $FOLDER/ ; do
-    echo "Downloading videos for $FULL_CHANNEL"
+    printf "${LIGHT_GREEN}Downloading videos for $FULL_CHANNEL${NO_COLOUR}\n"
 
     cd -- $FULL_CHANNEL
 
@@ -72,14 +80,14 @@ for FULL_CHANNEL in $FOLDER/ ; do
         # Check to see if the video was already downloaded in a prior run
         if [ -f .youtube_dl_success ]; then
             if [ "$(grep $VIDEO_ID .youtube_dl_success)" != "" ]; then
-                echo "Video $FULL_CHANNEL / $VIDEO_ID previously downloaded from Youtube, skipping..."
+                printf "${GREEN}SKIP SUCCESS${NO_COLOUR}: Video $FULL_CHANNEL / $VIDEO_ID previously downloaded from YouTube, skipping...\n"
                 continue
             fi
         fi
 
         if [ -f .seed_dl_success ]; then
             if [ "$(grep $VIDEO_ID .seed_dl_success)" != "" ]; then
-                echo "Video $FULL_CHANNEL / $VIDEO_ID previously downloaded from Seed, skipping..."
+                printf "${GREEN}SKIP SUCCESS${NO_COLOUR}: Video $FULL_CHANNEL / $VIDEO_ID previously downloaded from Seed, skipping...\n"
                 continue
             fi
         fi
@@ -88,7 +96,7 @@ for FULL_CHANNEL in $FOLDER/ ; do
         youtube-dl --write-info-json --write-all-thumbnails https://youtu.be/$VIDEO_ID
         if [ $? -ne 0 ]; then
             rm -f *-$VIDEO_ID*
-            echo "!! Download of $FULL_CHANNEL / $VIDEO_ID failed from Youtube !!"
+            printf "${YELLOW}WARNING{$NO_COLOUR}:Download of $FULL_CHANNEL / $VIDEO_ID failed from YouTube\n"
 
             # Read the seed channel data to get all the files for the same video ID downloaded
             # Grep the lines we want: cat .channel_data | grep $VIDEO_ID
@@ -98,7 +106,7 @@ for FULL_CHANNEL in $FOLDER/ ; do
                 # Download each item now
                 curl $SEED_SITE$FULL_CHANNEL$LINK -o $LINK
                 if [ $? -ne 0 ]; then
-                    echo "Failed to download $VIDEO_ID from the original seed source"
+                    printf "${RED}ERROR${NO_COLOUR}: Failed to download $VIDEO_ID from the original seed source\n"
                     echo "$VIDEO_ID" >> .seed_dl_fail
                     rm -f *-$VIDEO_ID*
                 fi
@@ -106,7 +114,7 @@ for FULL_CHANNEL in $FOLDER/ ; do
             if [ $? -eq 0 ]; then
                 echo "$VIDEO_ID" >> .seed_dl_success
                 if [ "$FROM_SEED_SCRIPT" != "" ]; then
-                    echo "Calling the 'FROM SEED SCRIPT' for $VIDEO_ID"
+                    printf "${GREEN}SEED SUCCESS${NO_COLOUR}: Calling the 'FROM SEED SCRIPT' for $VIDEO_ID\n"
                     $FROM_SEED_SCRIPT $FULL_CHANNEL $VIDEO_ID
                 fi
             fi
@@ -120,7 +128,7 @@ for FULL_CHANNEL in $FOLDER/ ; do
             fi
 
             if [ "$FROM_YT_SCRIPT" != "" ]; then
-            echo "Calling the 'FROM YOUTUBE SCRIPT' for $VIDEO_ID"
+                printf "${GREEN}YOUTUBE SUCCESS${NO_COLOUR}: Calling the 'FROM YOUTUBE SCRIPT' for $VIDEO_ID\n"
                 $FROM_YT_SCRIPT $FULL_CHANNEL $VIDEO_ID
             fi
 
