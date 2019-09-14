@@ -90,7 +90,6 @@ for FULL_CHANNEL in $FOLDER/ ; do
                 fi
             done
             if [ $? -eq 0 ]; then
-            echo DOING IT
                 if [ "$FROM_SEED_SCRIPT" != "" ]; then
                     echo "Calling the 'FROM SEED SCRIPT' for $VIDEO_ID"
                     $FROM_SEED_SCRIPT $FULL_CHANNEL $VIDEO_ID
