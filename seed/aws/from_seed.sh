@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 
 CHANNEL="$1"
 VIDEO_ID=$2

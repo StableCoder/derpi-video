@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 
 # This quick script just cleans all the .derpi.json files found within the
 # target directory, recursively

@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 
 CURRENT_TIME=$(date -u +%F\ %X)
 VIDEO_ID=$2
