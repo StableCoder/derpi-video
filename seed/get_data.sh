@@ -51,7 +51,7 @@ case $key in
     shift
     ;;
     *)    # unknown option
-    printf "${RED}ERROR${NO_COLOUR}: Unknown option: $1\n"
+    echo -e "${RED}ERROR${NO_COLOUR}: Unknown option: $1\n"
     exit 1
     ;;
 esac
@@ -60,11 +60,11 @@ done
 exec 2>&1
 
 if [ "$SEED_SITE" == "" ]; then
-    printf "${RED}ERROR${NO_COLOUR}: Need to provide a seed site to start!\n"
+    echo -e "${RED}ERROR${NO_COLOUR}: Need to provide a seed site to start!\n"
     exit 1
 fi
 if [ $RM_FORMATS -eq 1 ] && [ ! -f $SCRIPT_DIR/../clean_info_json.py ]; then
-    printf "${RED}ERROR${NO_COLOUR}: Cannot find the 'clean_info_json.py' script correctly, is it in the correct location?\n"
+    echo -e "${RED}ERROR${NO_COLOUR}: Cannot find the 'clean_info_json.py' script correctly, is it in the correct location?\n"
     exit 1
 fi
 
@@ -72,22 +72,22 @@ cd -- $TARGET_DIR
 
 # Now go through each channel/directory and download the videos
 for FULL_CHANNEL in $FOLDER/ ; do
-    printf "${LIGHT_GREEN}Downloading videos for $FULL_CHANNEL${NO_COLOUR}\n"
+    echo -e  "${LIGHT_GREEN}Downloading videos for $FULL_CHANNEL${NO_COLOUR}\n"
 
     cd -- $FULL_CHANNEL
 
     while read VIDEO_ID; do
         # Check to see if the video was already downloaded in a prior run
         if [ -f .youtube_dl_success ]; then
-            if [ "$(grep $VIDEO_ID .youtube_dl_success)" != "" ]; then
-                printf "${GREEN}SKIP SUCCESS${NO_COLOUR}: Video $FULL_CHANNEL / $VIDEO_ID previously downloaded from YouTube, skipping...\n"
+            if [ "$(grep -- $VIDEO_ID .youtube_dl_success)" != "" ]; then
+                echo -e "${GREEN}SKIP SUCCESS${NO_COLOUR}: Video $FULL_CHANNEL / $VIDEO_ID previously downloaded from YouTube, skipping...\n"
                 continue
             fi
         fi
 
         if [ -f .seed_dl_success ]; then
-            if [ "$(grep $VIDEO_ID .seed_dl_success)" != "" ]; then
-                printf "${GREEN}SKIP SUCCESS${NO_COLOUR}: Video $FULL_CHANNEL / $VIDEO_ID previously downloaded from Seed, skipping...\n"
+            if [ "$(grep -- $VIDEO_ID .seed_dl_success)" != "" ]; then
+                echo -e "${GREEN}SKIP SUCCESS${NO_COLOUR}: Video $FULL_CHANNEL / $VIDEO_ID previously downloaded from Seed, skipping...\n"
                 continue
             fi
         fi
@@ -96,7 +96,7 @@ for FULL_CHANNEL in $FOLDER/ ; do
         youtube-dl --write-info-json --write-all-thumbnails https://youtu.be/$VIDEO_ID
         if [ $? -ne 0 ]; then
             rm -f *-$VIDEO_ID*
-            printf "${YELLOW}WARNING{$NO_COLOUR}:Download of $FULL_CHANNEL / $VIDEO_ID failed from YouTube\n"
+            echo -e "${YELLOW}WARNING{$NO_COLOUR}:Download of $FULL_CHANNEL / $VIDEO_ID failed from YouTube\n"
 
             # Read the seed channel data to get all the files for the same video ID downloaded
             # Grep the lines we want: cat .channel_data | grep $VIDEO_ID
@@ -106,7 +106,7 @@ for FULL_CHANNEL in $FOLDER/ ; do
                 # Download each item now
                 curl $SEED_SITE$FULL_CHANNEL$LINK -o $LINK
                 if [ $? -ne 0 ]; then
-                    printf "${RED}ERROR${NO_COLOUR}: Failed to download $VIDEO_ID from the original seed source\n"
+                    echo -e "${RED}ERROR${NO_COLOUR}: Failed to download $VIDEO_ID from the original seed source\n"
                     echo "$VIDEO_ID" >> .seed_dl_fail
                     rm -f *-$VIDEO_ID*
                 fi
@@ -114,7 +114,7 @@ for FULL_CHANNEL in $FOLDER/ ; do
             if [ $? -eq 0 ]; then
                 echo "$VIDEO_ID" >> .seed_dl_success
                 if [ "$FROM_SEED_SCRIPT" != "" ]; then
-                    printf "${GREEN}SEED SUCCESS${NO_COLOUR}: Calling the 'FROM SEED SCRIPT' for $VIDEO_ID\n"
+                    echo -e "${GREEN}SEED SUCCESS${NO_COLOUR}: Calling the 'FROM SEED SCRIPT' for $VIDEO_ID\n"
                     $FROM_SEED_SCRIPT $FULL_CHANNEL $VIDEO_ID
                 fi
             fi
@@ -128,7 +128,7 @@ for FULL_CHANNEL in $FOLDER/ ; do
             fi
 
             if [ "$FROM_YT_SCRIPT" != "" ]; then
-                printf "${GREEN}YOUTUBE SUCCESS${NO_COLOUR}: Calling the 'FROM YOUTUBE SCRIPT' for $VIDEO_ID\n"
+                echo -e "${GREEN}YOUTUBE SUCCESS${NO_COLOUR}: Calling the 'FROM YOUTUBE SCRIPT' for $VIDEO_ID\n"
                 $FROM_YT_SCRIPT $FULL_CHANNEL $VIDEO_ID
             fi
 
