@@ -134,7 +134,7 @@ for FULL_CHANNEL in $FOLDER/ ; do
 
             echo "$VIDEO_ID" >> .youtube_dl_success
         fi
-        sleep 61
+        sleep 91
     done < .channel_videos
 
 
