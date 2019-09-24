@@ -94,7 +94,7 @@ for FULL_CHANNEL in $FOLDER/ ; do
 
         # At this point, we're going to try to download it
         youtube-dl --write-info-json --write-all-thumbnails https://youtu.be/$VIDEO_ID
-        if [ $? -ne 0 ]; then
+        if [[ $? -ne 0 ]]; then
             rm -f *-$VIDEO_ID*
             echo -e "${YELLOW}WARNING${NO_COLOUR}: Download of $FULL_CHANNEL $VIDEO_ID failed from YouTube\n"
 
@@ -105,13 +105,14 @@ for FULL_CHANNEL in $FOLDER/ ; do
             cat .channel_data | grep -- $VIDEO_ID | awk 'match($0, /a href="([^"]*)/, m) { print m[1] }' | grep -v '.description' | while read -r LINK ; do
                 # Download each item now
                 curl -o $LINK -- $SEED_SITE$FULL_CHANNEL$LINK
-                if [ $? -ne 0 ]; then
+                if [[ $? -ne 0 ]]; then
                     echo -e "${RED}ERROR${NO_COLOUR}: Failed to download $VIDEO_ID from the original seed source\n"
                     echo "$VIDEO_ID" >> .seed_dl_fail
                     rm -f *-$VIDEO_ID*
                 fi
             done
-            if [ $? -eq 0 ]; then
+            ls "*$VIDEO_ID*"
+            if [[ $? -eq 0 ]]; then
                 echo "$VIDEO_ID" >> .seed_dl_success
                 if [ "$FROM_SEED_SCRIPT" != "" ]; then
                     echo -e "${GREEN}SEED SUCCESS${NO_COLOUR}: Calling the 'FROM SEED SCRIPT' for $VIDEO_ID\n"
@@ -120,7 +121,7 @@ for FULL_CHANNEL in $FOLDER/ ; do
             fi
         else
             # Remove the useless (for us) 'formats' section from the json files.
-            if [ $RM_FORMATS -eq 1 ]; then
+            if [[ $RM_FORMATS -eq 1 ]]; then
                 for FILE in ./*-$VIDEO_ID.info.json
                 do
                     $SCRIPT_DIR/../clean_info_json.py "$FILE"
