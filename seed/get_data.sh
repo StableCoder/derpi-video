@@ -111,7 +111,7 @@ for FULL_CHANNEL in $FOLDER/ ; do
                     rm -f *-$VIDEO_ID*
                 fi
             done
-            ls "*$VIDEO_ID*"
+            ls *-$VIDEO_ID.*
             if [[ $? -eq 0 ]]; then
                 echo "$VIDEO_ID" >> .seed_dl_success
                 if [ "$FROM_SEED_SCRIPT" != "" ]; then
