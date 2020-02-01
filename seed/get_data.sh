@@ -10,51 +10,50 @@ NO_COLOUR='\033[0m'
 # Script Vars
 SEED_SITE=
 TARGET_DIR=$(pwd)/seed-workdir
-SCRIPT_DIR="$( cd -- "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 FOLDER=*
 FROM_YT_SCRIPT=
 FROM_SEED_SCRIPT=
 RM_FORMATS=1
 
-while [[ $# -gt 0 ]]
-do
-key="$1"
+while [[ $# -gt 0 ]]; do
+    key="$1"
 
-case $key in
-    -s|--seed)
-    SEED_SITE="$2"
-    shift # past argument
-    shift # past value
-    ;;
-    -t|--target)
-    TARGET_DIR="$2"
-    shift
-    shift
-    ;;
+    case $key in
+    -s | --seed)
+        SEED_SITE="$2"
+        shift # past argument
+        shift # past value
+        ;;
+    -t | --target)
+        TARGET_DIR="$2"
+        shift
+        shift
+        ;;
     --from-youtube)
-    FROM_YT_SCRIPT=$2
-    shift
-    shift
-    ;;
+        FROM_YT_SCRIPT=$2
+        shift
+        shift
+        ;;
     --from-seed)
-    FROM_SEED_SCRIPT=$2
-    shift
-    shift
-    ;;
-    -f|--folder)
-    FOLDER=$2
-    shift
-    shift
-    ;;
+        FROM_SEED_SCRIPT=$2
+        shift
+        shift
+        ;;
+    -f | --folder)
+        FOLDER=$2
+        shift
+        shift
+        ;;
     --no-prune)
-    RM_FORMATS=0
-    shift
-    ;;
-    *)    # unknown option
-    echo -e "${RED}ERROR${NO_COLOUR}: Unknown option: $1\n"
-    exit 1
-    ;;
-esac
+        RM_FORMATS=0
+        shift
+        ;;
+    *) # unknown option
+        echo -e "${RED}ERROR${NO_COLOUR}: Unknown option: $1\n"
+        exit 1
+        ;;
+    esac
 done
 
 exec 2>&1
@@ -71,28 +70,33 @@ fi
 cd -- $TARGET_DIR
 
 # Now go through each channel/directory and download the videos
-for FULL_CHANNEL in $FOLDER/ ; do
-    echo -e  "${LIGHT_GREEN}Downloading videos for $FULL_CHANNEL${NO_COLOUR}\n"
+for FULL_CHANNEL in $FOLDER/; do
+    echo -e "${LIGHT_GREEN}Downloading videos for $FULL_CHANNEL${NO_COLOUR}\n"
 
     cd -- $FULL_CHANNEL
 
     while read VIDEO_ID; do
         # Check to see if the video was already downloaded in a prior run
-        if [ -f .youtube_dl_success ]; then
-            if [ "$(grep -- $VIDEO_ID .youtube_dl_success)" != "" ]; then
+        if [ -f .youtube ]; then
+            if [ "$(grep -- $VIDEO_ID .youtube)" != "" ]; then
                 echo -e "${GREEN}SKIP SUCCESS${NO_COLOUR}: Video $FULL_CHANNEL $VIDEO_ID previously downloaded from YouTube, skipping...\n"
                 continue
             fi
         fi
 
-        if [ -f .seed_dl_success ]; then
-            if [ "$(grep -- $VIDEO_ID .seed_dl_success)" != "" ]; then
+        if [ -f .seed ]; then
+            if [ "$(grep -- $VIDEO_ID .seed)" != "" ]; then
                 echo -e "${GREEN}SKIP SUCCESS${NO_COLOUR}: Video $FULL_CHANNEL $VIDEO_ID previously downloaded from Seed, skipping...\n"
                 continue
             fi
         fi
 
         # At this point, we're going to try to download it
+        echo -e "${LIGHT_GREEN}Downloading${NO_COLOUR}: Attempting to download $FULL_CHANNEL - $VIDEO_ID"
+
+        # First, delete any of the older files associated with this particular video
+        rm *-$VIDEO_ID.*
+
         youtube-dl --write-info-json --write-all-thumbnails https://youtu.be/$VIDEO_ID
         if [[ $? -ne 0 ]]; then
             rm -f *-$VIDEO_ID*
@@ -102,18 +106,19 @@ for FULL_CHANNEL in $FOLDER/ ; do
             # Grep the lines we want: cat .channel_data | grep $VIDEO_ID
             # Then awk just the filenames we want: awk 'match($0, /a href="([^"]*)/, m) { print m[1] }'
             # Then grep the lines that DON't have '.description'
-            cat .channel_data | grep -- $VIDEO_ID | awk 'match($0, /a href="([^"]*)/, m) { print m[1] }' | grep -v '.description' | while read -r LINK ; do
+            cat .channel_data | grep -- $VIDEO_ID | awk 'match($0, /a href="([^"]*)/, m) { print m[1] }' | grep -v '.description' | while read -r LINK; do
                 # Download each item now
-                curl -o $LINK -- $SEED_SITE$FULL_CHANNEL$LINK
+                curl -o dl_temp -- $SEED_SITE$FULL_CHANNEL$LINK
                 if [[ $? -ne 0 ]]; then
                     echo -e "${RED}ERROR${NO_COLOUR}: Failed to download $VIDEO_ID from the original seed source\n"
-                    echo "$VIDEO_ID" >> .seed_dl_fail
                     rm -f *-$VIDEO_ID*
+                else
+                    mv dl_temp $LINK
                 fi
             done
             ls *-$VIDEO_ID.*
             if [[ $? -eq 0 ]]; then
-                echo "$VIDEO_ID" >> .seed_dl_success
+                echo "$VIDEO_ID" >>.seed
                 if [ "$FROM_SEED_SCRIPT" != "" ]; then
                     echo -e "${GREEN}SEED SUCCESS${NO_COLOUR}: Calling the 'FROM SEED SCRIPT' for $VIDEO_ID\n"
                     $FROM_SEED_SCRIPT $FULL_CHANNEL $VIDEO_ID
@@ -122,8 +127,7 @@ for FULL_CHANNEL in $FOLDER/ ; do
         else
             # Remove the useless (for us) 'formats' section from the json files.
             if [[ $RM_FORMATS -eq 1 ]]; then
-                for FILE in ./*-$VIDEO_ID.info.json
-                do
+                for FILE in ./*-$VIDEO_ID.info.json; do
                     $SCRIPT_DIR/../clean_info_json.py "$FILE"
                 done
             fi
@@ -133,11 +137,10 @@ for FULL_CHANNEL in $FOLDER/ ; do
                 $FROM_YT_SCRIPT $FULL_CHANNEL $VIDEO_ID
             fi
 
-            echo "$VIDEO_ID" >> .youtube_dl_success
+            echo "$VIDEO_ID" >>.youtube
         fi
         sleep 91
-    done < .channel_videos
-
+    done <<<$(cat .channel_data | awk 'match($0, /a href=".*(.{11})\.info\.json"/, m) { print m[1] }')
 
     cd -- $TARGET_DIR
 done
