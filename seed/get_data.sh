@@ -99,7 +99,7 @@ for FULL_CHANNEL in $FOLDER/; do
 
         youtube-dl --write-info-json --write-all-thumbnails https://youtu.be/$VIDEO_ID
         if [[ $? -ne 0 ]]; then
-            rm -f *-$VIDEO_ID*
+            rm -f -- *-$VIDEO_ID*
             echo -e "${YELLOW}WARNING${NO_COLOUR}: Download of $FULL_CHANNEL $VIDEO_ID failed from YouTube\n"
 
             # Read the seed channel data to get all the files for the same video ID downloaded
@@ -111,12 +111,12 @@ for FULL_CHANNEL in $FOLDER/; do
                 curl -o dl_temp -- $SEED_SITE$FULL_CHANNEL$LINK
                 if [[ $? -ne 0 ]]; then
                     echo -e "${RED}ERROR${NO_COLOUR}: Failed to download $VIDEO_ID from the original seed source\n"
-                    rm -f *-$VIDEO_ID*
+                    rm -f -- *-$VIDEO_ID*
                 else
                     mv dl_temp $LINK
                 fi
             done
-            ls *-$VIDEO_ID.*
+            ls -- *-$VIDEO_ID.*
             if [[ $? -eq 0 ]]; then
                 echo "$VIDEO_ID" >>.seed
                 if [ "$FROM_SEED_SCRIPT" != "" ]; then
@@ -140,7 +140,7 @@ for FULL_CHANNEL in $FOLDER/; do
             echo "$VIDEO_ID" >>.youtube
         fi
         sleep 91
-    done <<<$(cat .channel_data | awk 'match($0, /a href=".*(.{11})\.info\.json"/, m) { print m[1] }')
+    done <<<$(cat .channel_data | awk 'match($0, /a href=".*(.{11})\.description"/, m) { print m[1] }')
 
     cd -- $TARGET_DIR
 done
