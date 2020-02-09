@@ -15,6 +15,7 @@ FOLDER=*
 FROM_YT_SCRIPT=
 FROM_SEED_SCRIPT=
 RM_FORMATS=1
+PROCESS_PATTERN=
 
 while [[ $# -gt 0 ]]; do
     key="$1"
@@ -45,6 +46,11 @@ while [[ $# -gt 0 ]]; do
         shift
         shift
         ;;
+    -p | --pattern)
+        PROCESS_PATTERN=$2
+        shift
+        shift
+        ;;
     --no-prune)
         RM_FORMATS=0
         shift
@@ -71,6 +77,13 @@ cd -- $TARGET_DIR
 
 # Now go through each channel/directory and download the videos
 for FULL_CHANNEL in $FOLDER/; do
+    if [ "$PROCESS_PATTERN" != "" ]; then
+        if ! [[ $FULL_CHANNEL =~ $PROCESS_PATTERN ]]; then
+            # Skip this item, doesn't match pattern
+            continue
+        fi
+    fi
+
     echo -e "${LIGHT_GREEN}Downloading videos for $FULL_CHANNEL${NO_COLOUR}\n"
 
     cd -- $FULL_CHANNEL
