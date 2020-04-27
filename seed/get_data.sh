@@ -90,9 +90,23 @@ for FULL_CHANNEL in $FOLDER/; do
 
     while read VIDEO_ID; do
         # Check to see if the video was already downloaded in a prior run
+        if [ -f .ignore ]; then
+            if [ "$(grep -- $VIDEO_ID .youtube)" != "" ]; then
+                echo -e "${YELLOW}SKIP IGNORE${NO_COLOUR}: Video $FULL_CHANNEL $VIDEO_ID set to be ignored...\n"
+                continue
+            fi
+        fi
+
         if [ -f .youtube ]; then
             if [ "$(grep -- $VIDEO_ID .youtube)" != "" ]; then
                 echo -e "${GREEN}SKIP SUCCESS${NO_COLOUR}: Video $FULL_CHANNEL $VIDEO_ID previously downloaded from YouTube, skipping...\n"
+                continue
+            fi
+        fi
+
+        if [ -f .youtube_fail ]; then
+            if [ "$(grep -- $VIDEO_ID .youtube_fail)" != "" ]; then
+                echo -e "${RED}SKIP FAILURE${NO_COLOUR}: Video $FULL_CHANNEL $VIDEO_ID previously failed download from YouTube, skipping...\n"
                 continue
             fi
         fi
